@@ -1,2 +1,7 @@
-# daymap-app
+# Daymap App
 Electron app for Daymap with shortcuts to hide/show window for convenience
+
+## Instructions (Windows)
+1. Set application to run at startup by creating a shortcut in the startup folder 
+    * Press <kbd>Win</kbd> + <kbd>R</kbd>, type in `shell:startup` and press **ok**
+2. Shortcut to hide or show app is <kbd>Ctrl</kbd> + <kbd>\</kbd>
