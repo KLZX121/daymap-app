@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            * {
+                font-family: Verdana, Geneva, Tahoma, sans-serif;
+            }
+            html {
+                background-image: url('https://qasmt.eq.daymap.net/daymap/unsecured/images/coverimg.ashx');
+                background-size: 100%;
+            }
+            #username, #password, button {
+                float: right;
+            }
+            div {
+                margin-bottom: 1.5em;
+            }
+            body {
+                background-color: rgba(255, 255, 255, 0.5);
+                padding: 0.1em 2em 2.5em 1em;
+            }
+            #errorMsg {
+                position: absolute;
+                color: red;
+                font-size: 0.8em;
+                transition: all 500ms;
+            }
+            .animate {
+                background-color: yellow;
+            }
+        </style>
+        <script>
+            window.onerror = (message, source, lineno, colno, error) => alert(message + source + lineno + colno + error)
+
+            const fs = require('fs');
+            const { ipcRenderer } = require('electron');
+
+            ipcRenderer.on('fail', () => setError('Incorrect username or password'));
+
+            function submitCredentials(username, password){
+                let errorMsg = document.getElementById('errorMsg');
+                if (!username || !password){
+                    setError('Please enter a username and password');
+                    return;
+                }
+                errorMsg.innerHTML = null;
+                const credentials = JSON.stringify({
+                    username: username,
+                    password: password
+                });
+                fs.writeFileSync('./credentials.json', credentials);
+                ipcRenderer.send('auth', true);
+            }
+            function setError(value){
+                let errorMsg = document.getElementById('errorMsg');
+                errorMsg.setAttribute('class', 'animate');
+                errorMsg.innerHTML = value;
+                setTimeout(() => errorMsg.removeAttribute('class'), 300);
+            }
+        </script>
+    </head>
+    <body>
+        <h3>Proxy Credentials</h3>
+        
+        <div>
+            <label for="username">Username:</label>
+            <input type="text" id="username" placeholder="email@eq.edu.au">
+        </div>
+        <div>
+            <label for="password">Password:</label>
+            <input type="password" id="password" placeholder="password">
+        </div>
+        <div>
+            <span id="errorMsg"></span>
+            <button onclick="submitCredentials(username.value, password.value)">Login</button>
+        </div>
+    </body>
+</html>
