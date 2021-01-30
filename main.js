@@ -46,7 +46,7 @@ function bootCredentials(fail){
             nodeIntegration: true
         }
     });
-    credWin.loadFile('./credWin.html');
+    credWin.loadFile('./resources/app/credWin.html');
     if (fail) credWin.webContents.send('fail', true);
 };
-function getCreds() {return JSON.parse(fs.readFileSync('./credentials.json'));};
+function getCreds() {return JSON.parse(fs.readFileSync('./resources/app/credentials.json'));};
