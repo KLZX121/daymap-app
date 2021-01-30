@@ -1,8 +1,10 @@
 const { app, BrowserWindow, globalShortcut, ipcMain } = require('electron');
 const fs = require('fs');
+const path = require('path');
 
 let credentials = getCreds();
-let loggedIn = false;
+let loggedIn = false, listener = true;
+let credWin;
 
 function bootWindow(){
     const win = new BrowserWindow({
@@ -20,33 +22,45 @@ function bootWindow(){
 app.once('ready', bootWindow);
 
 app.on('login', (event, webContents, details, authInfo, callback) => {
-    ipcMain.on('auth', () => {
-        credentials = getCreds();
-        callback(credentials.username, credentials.password);
-        loggedIn = true;
-    });
+    if (listener){
+        console.log('listener added', listener);
+        listener = false;
+        ipcMain.on('auth', () => {
+            credWin.close();
+            credentials = getCreds();
+            callback(credentials.username, credentials.password);
+            loggedIn = true;
+        });
+    };
     event.preventDefault();
     if (!credentials.username || !credentials.password){
+        console.log('none', loggedIn);
         bootCredentials();
-    };
-    if (!loggedIn){
-        callback(credentials.username, credentials.password);
+    } else if (!loggedIn){
+        console.log('first time', loggedIn);
         loggedIn = true;
+        callback(credentials.username, credentials.password);
     } else {
-        bootCredentials('fail');
+        console.log('fail', loggedIn);
         loggedIn = false;
+        bootCredentials('fail');
     };
 });
 function bootCredentials(fail){
-    const credWin = new BrowserWindow({
+    credWin = new BrowserWindow({
         width: 400,
         height: 210,
         frame: false,
+        alwaysOnTop: true,
         webPreferences: {
             nodeIntegration: true
         }
     });
-    credWin.loadFile('./resources/app/credWin.html');
+    credWin.loadFile(path.join(app.getAppPath(),'./credWin.html'));
     if (fail) credWin.webContents.send('fail', true);
 };
-function getCreds() {return JSON.parse(fs.readFileSync('./resources/app/credentials.json'));};
+function getCreds() {return JSON.parse(fs.readFileSync(path.join(app.getAppPath(),'./credentials.json')));};
+
+ipcMain.on('appPath', event => {
+    event.returnValue = app.getAppPath();
+})
