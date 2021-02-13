@@ -6,7 +6,7 @@
                 font-family: Verdana, Geneva, Tahoma, sans-serif;
             }
             html {
-                background-image: url('https://qasmt.eq.daymap.net/daymap/unsecured/images/coverimg.ashx');
+                background-image: url('./imgs/coverimg.ashx');
                 background-size: 100%;
             }
             #username, #password, button {
@@ -26,39 +26,9 @@
                 transition: all 500ms;
             }
             .animate {
-                background-color: yellow;
+                background-color: rgba(255, 255, 255, 0.5);
             }
         </style>
-        <script>
-            window.onerror = (message, source, lineno, colno, error) => alert(message + source + lineno + colno + error)
-
-            const fs = require('fs');
-            const { ipcRenderer } = require('electron');
-            const path = require('path');
-
-            ipcRenderer.on('fail', () => setError('Incorrect username or password'));
-
-            function submitCredentials(username, password){
-                let errorMsg = document.getElementById('errorMsg');
-                if (!username || !password){
-                    setError('Please enter a username and password');
-                    return;
-                }
-                errorMsg.innerHTML = null;
-                const credentials = JSON.stringify({
-                    username: username,
-                    password: password
-                });
-                fs.writeFileSync(path.join(ipcRenderer.sendSync('appPath', true),'./credentials.json'), credentials);
-                ipcRenderer.send('auth', true);
-            }
-            function setError(value){
-                let errorMsg = document.getElementById('errorMsg');
-                errorMsg.setAttribute('class', 'animate');
-                errorMsg.innerHTML = value;
-                setTimeout(() => errorMsg.removeAttribute('class'), 300);
-            }
-        </script>
     </head>
     <body>
         <h3>Proxy Credentials</h3>
@@ -75,5 +45,44 @@
             <span id="errorMsg"></span>
             <button onclick="submitCredentials(username.value, password.value)">Login</button>
         </div>
+
+        <script>
+
+            const fs = require('fs');
+            const { ipcRenderer } = require('electron');
+            const path = require('path');
+
+            const errorMsg = document.getElementById('errorMsg');
+
+            let credentials = JSON.parse(fs.readFileSync(path.join(ipcRenderer.sendSync('appPath', true), './credentials.json')));
+
+            if (credentials.proxyUsername && credentials.proxyPassword) {
+                setError('Incorrect username or password');
+            };
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Enter') submitCredentials(username.value, password.value);
+            });
+
+            function submitCredentials(username, password){
+                if (!username || !password){
+                    setError('Please enter a username and password');
+                    return;
+                }
+                errorMsg.innerHTML = null;
+                const credentials = JSON.stringify({
+                    proxyUsername: username,
+                    proxyPassword: password,
+                    username: credentials.username,
+                    password: credentials.password
+                });
+                fs.writeFileSync(path.join(ipcRenderer.sendSync('appPath', true),'./credentials.json'), credentials);
+                ipcRenderer.send('auth', true);
+            }
+            function setError(value){
+                errorMsg.innerHTML = value;
+                errorMsg.setAttribute('class', 'animate');
+                setTimeout(() => errorMsg.removeAttribute('class'), 1000);
+            }
+        </script>
     </body>
 </html>

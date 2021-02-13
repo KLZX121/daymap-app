@@ -1,14 +1,24 @@
-const { app, BrowserWindow, globalShortcut, ipcMain } = require('electron');
+process.on('uncaughtException', function (err) {
+    app.relaunch();
+    app.exit();
+});
+
+const { app, BrowserWindow, globalShortcut, ipcMain, Menu, Tray } = require('electron');
 const fs = require('fs');
 const path = require('path');
 
 let credentials = getCreds();
 let loggedIn = false, listener = true;
-let credWin;
+let authWin;
+let tray = null; 
 
 function bootWindow(){
     const win = new BrowserWindow({
-        show: false
+        show: false,
+        icon: path.join(app.getAppPath(), './imgs/favicon.ico'),
+        webPreferences: {
+            preload: path.join(app.getAppPath(), './preload.js')
+        }
     });
 
     win.loadURL('https://qasmt.eq.daymap.net/daymap/student/dayplan.aspx');
@@ -17,47 +27,67 @@ function bootWindow(){
     globalShortcut.register('Ctrl+\\', ()=>{
         win.isVisible() ? win.hide() : win.show();
     });
+
+    win.on('close', function (event) {
+        if (!app.isQuiting){
+            event.preventDefault();
+            win.hide();
+        }
+    
+        return false;
+    });
+
+    const contextMenu = Menu.buildFromTemplate([
+        { 
+            label: 'Quit', 
+            click:  function(){
+                app.isQuiting = true;
+                app.quit();
+            } 
+        }
+    ]);
+
+    tray = new Tray(path.join(app.getAppPath(), './imgs/favicon.ico'));
+    tray.setToolTip('Right click for options');
+    tray.setContextMenu(contextMenu);
+    tray.on('click', () => win.show())
+
 };
 
 app.once('ready', bootWindow);
 
-app.on('login', (event, webContents, details, authInfo, callback) => {
+app.on('login', (event, webContents, request, authInfo, callback) => {
     if (listener){
-        console.log('listener added', listener);
         listener = false;
         ipcMain.on('auth', () => {
-            credWin.close();
+            authWin.close();
             credentials = getCreds();
-            callback(credentials.username, credentials.password);
+            callback(credentials.proxyUsername, credentials.proxyPassword);
             loggedIn = true;
         });
     };
     event.preventDefault();
-    if (!credentials.username || !credentials.password){
-        console.log('none', loggedIn);
+    if (!credentials.proxyUsername || !credentials.proxyPassword){
         bootCredentials();
     } else if (!loggedIn){
-        console.log('first time', loggedIn);
         loggedIn = true;
-        callback(credentials.username, credentials.password);
+        callback(credentials.proxyUsername, credentials.proxyPassword);
     } else {
-        console.log('fail', loggedIn);
         loggedIn = false;
-        bootCredentials('fail');
+        bootCredentials();
     };
 });
-function bootCredentials(fail){
-    credWin = new BrowserWindow({
+
+function bootCredentials(){
+    authWin = new BrowserWindow({
         width: 400,
         height: 210,
         frame: false,
-        alwaysOnTop: true,
         webPreferences: {
             nodeIntegration: true
         }
     });
-    credWin.loadFile(path.join(app.getAppPath(),'./credWin.html'));
-    if (fail) credWin.webContents.send('fail', true);
+    authWin.loadFile(path.join(app.getAppPath(),'./authWin.html'));
 };
 function getCreds() {return JSON.parse(fs.readFileSync(path.join(app.getAppPath(),'./credentials.json')));};
 
