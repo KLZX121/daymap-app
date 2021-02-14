@@ -1,9 +1,7 @@
-const fs = require('fs');
-const path = require('path');
 const g = document.getElementById.bind(document);
 const { ipcRenderer } = require('electron');
 
-const creds = ipcRenderer.sendSync('getStore', '')//JSON.parse(fs.readFileSync(path.join(__dirname, './credentials.json')));
+const creds = ipcRenderer.sendSync('getStore', '');
 
 window.addEventListener('DOMContentLoaded', run);
 
@@ -22,7 +20,7 @@ function run(){
             creds.username = username.value;
             creds.password = password.value;
 
-            ipcRenderer.send('setStore', creds);//fs.writeFile(path.join(__dirname, './credentials.json'), JSON.stringify(creds), ()=>{});
+            ipcRenderer.send('setStore', creds);
         };
     };
 };

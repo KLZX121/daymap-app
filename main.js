@@ -4,13 +4,11 @@ process.on('uncaughtException', function (err) {
 });
 
 const { app, BrowserWindow, globalShortcut, ipcMain, Menu, Tray } = require('electron');
-const fs = require('fs');
 const path = require('path');
 const Store = require('electron-store');
 
 const store = new Store();
-store.clear();
-console.log(store.store);
+
 let credentials = getCreds();
 let loggedIn = false, listener = true;
 let authWin;
@@ -94,7 +92,7 @@ function bootCredentials(){
     authWin.loadFile(path.join(app.getAppPath(),'./authWin.html'));
 
 };
-//function getCreds() {return JSON.parse(fs.readFileSync(path.join(app.getAppPath(),'./credentials.json')));};
+
 function getCreds() {return store.store};
 
 ipcMain.on('getStore', event => event.returnValue = store.store);
