@@ -88,6 +88,7 @@ function bootCredentials(){
         }
     });
     authWin.loadFile(path.join(app.getAppPath(),'./authWin.html'));
+    authWin.webContents.openDevTools();
 };
 function getCreds() {return JSON.parse(fs.readFileSync(path.join(app.getAppPath(),'./credentials.json')));};
 

@@ -54,9 +54,9 @@
 
             const errorMsg = document.getElementById('errorMsg');
 
-            let credentials = JSON.parse(fs.readFileSync(path.join(ipcRenderer.sendSync('appPath', true), './credentials.json')));
+            let creds = JSON.parse(fs.readFileSync(path.join(ipcRenderer.sendSync('appPath', true), './credentials.json')));
 
-            if (credentials.proxyUsername && credentials.proxyPassword) {
+            if (creds.proxyUsername && creds.proxyPassword) {
                 setError('Incorrect username or password');
             };
             document.addEventListener('keydown', event => {
@@ -72,8 +72,8 @@
                 const credentials = JSON.stringify({
                     proxyUsername: username,
                     proxyPassword: password,
-                    username: credentials.username,
-                    password: credentials.password
+                    username: creds.username,
+                    password: creds.password
                 });
                 fs.writeFileSync(path.join(ipcRenderer.sendSync('appPath', true),'./credentials.json'), credentials);
                 ipcRenderer.send('auth', true);
