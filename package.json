@@ -5,49 +5,18 @@
   "main": "main.js",
   "scripts": {
     "test": "electron .",
-    "start": "electron-forge start",
-    "package": "electron-forge package",
-    "make": "electron-forge make"
+    "dist": "electron-builder"
   },
   "keywords": [],
   "author": "KLZX121",
   "license": "ISC",
-  "dependencies": {
-    "electron-squirrel-startup": "^1.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "@electron-forge/cli": "^6.0.0-beta.54",
-    "@electron-forge/maker-deb": "^6.0.0-beta.54",
-    "@electron-forge/maker-rpm": "^6.0.0-beta.54",
-    "@electron-forge/maker-squirrel": "^6.0.0-beta.54",
-    "@electron-forge/maker-zip": "^6.0.0-beta.54",
-    "electron": "11.2.1"
+    "electron": "11.2.1",
+    "electron-builder": "^22.9.1"
   },
-  "config": {
-    "forge": {
-      "packagerConfig": {},
-      "makers": [
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "daymap_app"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
-        }
-      ]
-    }
+  "build": {
+    "appId": "com.electron.daymap",
+    "productName": "Daymap App"
   }
 }
