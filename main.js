@@ -3,7 +3,7 @@ process.on('uncaughtException', function (err) {
     app.exit();
 });
 
-const { app, BrowserWindow, globalShortcut, ipcMain, Menu, Tray } = require('electron');
+const { app, BrowserWindow, globalShortcut, ipcMain, Menu, Tray, shell } = require('electron');
 const path = require('path');
 const Store = require('electron-store');
 
@@ -25,7 +25,10 @@ function bootWindow(){
 
     win.loadURL('https://qasmt.eq.daymap.net/daymap/student/dayplan.aspx');
     win.webContents.on('did-stop-loading', () => win.maximize());
-
+    win.webContents.on('new-window', (event, url) => {
+        event.preventDefault();
+        shell.openExternal(url);
+    })
     globalShortcut.register('Ctrl+\\', ()=>{
         win.isVisible() ? win.hide() : win.show();
     });
