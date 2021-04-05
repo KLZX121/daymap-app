@@ -14,6 +14,8 @@ let loggedIn = false, listener = true;
 let authWin;
 let tray = null; 
 
+app.setLoginItemSettings({openAtLogin: true})
+
 function bootWindow(){
     const win = new BrowserWindow({
         show: false,
